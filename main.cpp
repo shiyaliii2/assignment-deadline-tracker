@@ -5,7 +5,7 @@
 using namespace std;
 
 // Define a constant for the filename
-const string ASSIGNMENTS_FILE = "assignments.dat";
+const string ASSIGNMENTS_FILE = "assignments.txt";
 
 int main() {
     // Load existing assignments from file
