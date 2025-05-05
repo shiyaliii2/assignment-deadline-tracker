@@ -21,10 +21,11 @@ public:
 
 time_t createDueDate(int year, int month, int day);
 string formatDate(time_t date);
+bool isDateInPast(time_t date);
 void checkReminders(const vector<Assignment>& assignments);
 void PrintMenu();
 
-// New file I/O functions
+// File I/O functions
 void saveAssignments(const vector<Assignment>& assignments, const string& filename);
 vector<Assignment> loadAssignments(const string& filename);
 
