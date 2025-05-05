@@ -62,6 +62,7 @@ int main() {
 
 
         }else if(choice == "2"){
+                system("cls");
                 cout << "\n======= ALL ASSIGNMENTS =========\n";
                 if(assignments.empty()) {
                     cout << "\n  No assignments found.\n"<<endl;
@@ -70,10 +71,10 @@ int main() {
                         a.display();
                     }
                 }
-                cout << "==================================\n";
+                cout << "==================================\n"<<endl;
 
         } else if(choice == "3"){
-
+            system("cls");
             checkReminders(assignments);
 
         } else if(choice == "4"){
