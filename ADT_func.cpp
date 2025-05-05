@@ -1,9 +1,9 @@
 #include "header/FADT_headers.h"
 #include <vector>
-#include <iomanip>
 #include <algorithm>
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 
 // Function to save assignments to a file
 void saveAssignments(const vector<Assignment>& assignments, const string& filename) {
@@ -12,53 +12,42 @@ void saveAssignments(const vector<Assignment>& assignments, const string& filena
         cerr << "Error: Unable to open file for writing: " << filename << endl;
         return;
     }
-
     for (const auto& assignment : assignments) {
+        // Store the date in ISO format YYYY-MM-DD instead of raw time_t
         outFile << assignment.getSubject() << "|"
                 << assignment.getName() << "|"
-                << assignment.getDueDate() << endl;
+                << formatDate(assignment.getDueDate()) << endl;
     }
-
     outFile.close();
-    cout << "Assignments saved to " << filename << endl;
 }
 
 // Function to load assignments from a file
 vector<Assignment> loadAssignments(const string& filename) {
     vector<Assignment> assignments;
     ifstream inFile(filename);
-
-    if (!inFile) {
-        cout << "No existing assignments file found. Starting with empty list." << endl;
-        return assignments;
-    }
-
     string line;
     while (getline(inFile, line)) {
         stringstream ss(line);
         string subject, name, dueDateStr;
-        time_t dueDate;
-
         getline(ss, subject, '|');
         getline(ss, name, '|');
-        string timeStr;
-        getline(ss, timeStr);
+        getline(ss, dueDateStr);
 
-        // Convert string to time_t
-        dueDate = stoll(timeStr);
+        // Parse the date from YYYY-MM-DD format
+        int year, month, day;
+        sscanf(dueDateStr.c_str(), "%d-%d-%d", &year, &month, &day);
+        time_t dueDate = createDueDate(year, month, day);
 
         assignments.push_back(Assignment(subject, name, dueDate));
     }
-
     inFile.close();
-    cout << "Loaded " << assignments.size() << " assignments from " << filename << endl;
 
     return assignments;
 }
-//Constructor
+
 Assignment::Assignment(string sub, string nm, time_t due)
     : subject(sub), name(nm), dueDate(due) {}
-//Getters
+
 string Assignment::getSubject() const {
     return subject;
 }
@@ -74,13 +63,36 @@ time_t Assignment::getDueDate() const {
 void Assignment::display() const {
     cout << subject << " - " << name << " (Due: " << formatDate(dueDate) << ")\n";
 }
-//Di ko alam to pre basta parang icacalculate o iseset yung date from year 1900 parang ganon perds
+
 time_t createDueDate(int year, int month, int day) {
     tm tmStruct = {0};
     tmStruct.tm_year = year - 1900;
     tmStruct.tm_mon = month - 1;
     tmStruct.tm_mday = day;
+    tmStruct.tm_hour = 12; // Set to noon to avoid timezone issues
     return mktime(&tmStruct);
+}
+
+// Function to check if a date is in the past
+bool isDateInPast(time_t date) {
+    time_t now = time(nullptr);
+    // Convert to local time structures to compare just dates
+    tm* date_tm = localtime(&date);
+    tm* now_tm = localtime(&now);
+
+    // Reset hours, minutes, seconds to compare dates only
+    date_tm->tm_hour = 0;
+    date_tm->tm_min = 0;
+    date_tm->tm_sec = 0;
+    now_tm->tm_hour = 0;
+    now_tm->tm_min = 0;
+    now_tm->tm_sec = 0;
+
+    // Convert back to time_t for comparison
+    time_t date_day = mktime(date_tm);
+    time_t now_day = mktime(now_tm);
+
+    return date_day < now_day;
 }
 
 string formatDate(time_t date) {
@@ -90,13 +102,10 @@ string formatDate(time_t date) {
     return string(buffer);
 }
 
-
-//Check reminders 
 void checkReminders(const vector<Assignment>& assignments) {
     time_t now = time(nullptr);
     time_t tomorrow = now + 24 * 60 * 60;
-
-    cout << "\n--- REMINDERS ---\n";
+    cout << "\n====== REMINDERS =======\n";
     for (const auto& assignment : assignments) {
         time_t due = assignment.getDueDate();
         if (due < now) {
@@ -112,11 +121,10 @@ void checkReminders(const vector<Assignment>& assignments) {
                  << formatDate(due) << ")" << endl;
         }
     }
-    cout << "----------------\n";
+    cout << "========================\n";
 }
-//Print display
-void PrintMenu(){
 
+void PrintMenu(){
     cout << "\n============================================\n";
     cout << "       ASSIGNMENT DEADLINE TRACKER\n";
     cout << "============================================\n";
@@ -126,5 +134,4 @@ void PrintMenu(){
     cout << "4. Save and exit\n";
     cout << "============================================\n"<<endl;
     cout << "Enter your choice: ";
-
 }
