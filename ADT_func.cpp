@@ -108,11 +108,14 @@ void checkReminders(const vector<Assignment>& assignments) {
     cout << "\n====== REMINDERS =======\n";
     for (const auto& assignment : assignments) {
         time_t due = assignment.getDueDate();
+
         if (due < now) {
+
             cout << "!!! PAST DUE !!! " << assignment.getSubject()
                  << " - " << assignment.getName() << " was due on "
                  << formatDate(due) << endl;
         } else if (due < tomorrow) {
+
             cout << "!!! DUE TOMORROW !!! " << assignment.getSubject()
                  << " - " << assignment.getName() << endl;
         } else if (due < now + 3 * 24 * 60 * 60) {
